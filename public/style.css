@@ -4,12 +4,14 @@
     box-sizing: border-box;
 }
 header{
+    margin-top: 2%;
     width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     text-align: center;
     height:10vh;
+    margin-bottom: 10%;
 }
 .main-container{
     height:90vh;
@@ -20,55 +22,8 @@ header{
 h2{
     text-align: center;
 }
-.li-json,
-.li-cdn{
-    flex: 1;
-    height: 80vh;
-    border: 1px solid black;
-}
-.docContainer{
-    padding-top: 8%;
-   min-height: 100%;
-   color: rgb(107, 117, 162);
-   font-weight: 300;
-    background: rgb(30, 29, 29);
-    display: grid;
-}
-.closeDocBtn{
-    position: absolute;
-    top: 2%;
-    right: 2%;
-    border: none;
-    border-radius: 50%;
-    padding:2px 4px;
-    background: linear-gradient(0.25turn, #ff0000ac, #e74f4f, #ff00007f);
-  
-}
-.closeDocBtn:hover{
-    animation-duration: 2s;
-}
-
-.tableRow{
-    height: 20%;
-    justify-content: space-evenly;
-    display: inline-flex;
-}
-.td{
-    flex: 1;
-    text-align: center;
-   height: fit-content;
-   max-width: 33.33333%;
-}
-.th{
-    background: linear-gradient(0.15turn, #00ffc80f, #61aab19f, #5d769c0f);
-    width: 100%;
-    color: white;
-}
-.envelope{
-    display: flex;
-    position: absolute;
-    align-self: center;
-    justify-content: space-around;
-    min-width: fit-content;
-    border: 3px solid rgb(46, 59, 57);
+#documentationLink{
+padding: 10px;
+margin: 10px;
+background: black;
 }
