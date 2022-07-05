@@ -8,7 +8,7 @@ const morgan = require("morgan");
 app.use(express.static("public"));
 const mongoose = require("mongoose");
 const Models = require("./models.js");
-
+//import collections
 const movies = Models.Movie;
 const users = Models.User;
 const genres = Models.genre;
@@ -16,6 +16,23 @@ const directors = Models.director;
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }));
+const { check, validationResult } = require('express-validator');
+//set up CORS
+const cors = require('cors');
+let allowedOrigins = ['http://localhost:8080', 'http://testsite.com'];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if(!origin) return callback(null, true);
+    if(allowedOrigins.indexOf(origin) === -1){ // If a specific origin isn’t found on the list of allowed origins
+      let message = 'The CORS policy for this application doesn’t allow access from origin ' + origin;
+      return callback(new Error(message ), false);
+    }
+    return callback(null, true);
+  }
+}));
+
+//set up Passport
 let auth = require('./auth')(app);
 const passport = require('passport');
 const { callbackify } = require("util");
@@ -47,8 +64,23 @@ app.get('/users', passport.authenticate('jwt', { session: false }),(req, res) =>
     res.status(500).send('Error: ' + err);
   });
 });
+
+
 //create -- create new user
-app.post("/users", (req, res) =>{
+app.post("/users",[
+  check('name', 'Username is required').isLength({min: 5}),
+  check('name', 'Username contains non alphanumeric characters - not allowed.').isAlphanumeric(),
+  check('password', 'Password is required').not().isEmpty(),
+  check('email', 'Email does not appear to be valid').isEmail()
+],(req, res) =>{
+  //input validation
+  let errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+  //password hashing/create account
+  let hashedPassword = users.hashPassword(req.body.password);
   users.findOne({ name: req.body.name })
     .then((user) => {
       if (user) {
@@ -57,7 +89,7 @@ app.post("/users", (req, res) =>{
         users
           .create({
             name: req.body.name,
-            password: req.body.password,
+            password: hashedPassword,
             email: req.body.email,
             birthday: req.body.birthday
           })
@@ -74,7 +106,11 @@ app.post("/users", (req, res) =>{
     });
 });
 //update -- update user info
-app.put("/users/:id", passport.authenticate('jwt', { session: false }),(req, res) =>{
+app.put("/users/:id", passport.authenticate('jwt', { session: false }),[
+  check('name', 'Username is required').isLength({min: 5}),
+  check('name', 'Username contains non alphanumeric characters - not allowed.').isAlphanumeric(),
+  check('email', 'Email does not appear to be valid').isEmail()
+],(req, res) =>{
   users.findByIdAndUpdate(req.params.id,{$set:req.body},{new:true}, function(err, result){
     if(err){
         console.log(err);
@@ -196,11 +232,16 @@ app.get("/movies/filmingLocations/:cityName", passport.authenticate('jwt', { ses
 });
 
 //create -- add movie to database
-app.post('/movie', passport.authenticate('jwt', { session: false }),(req, res) => {
-  movies.findOne({ name: req.body.Username })
+app.post('/movie', passport.authenticate('jwt', { session: false }),[
+  check('title', 'Title is required').isAlphanumeric(),
+  check('filmingLocations.name', 'Alphabetical Characters Only').isAlpha(),
+  check('filmingLocations.location.name', 'Alphabetical Characters Only').isAlpha(),
+  check('filmingLocations.locations.location', 'Please enter LatLong coordinates').isLatLong()
+],(req, res) => {
+  movies.findOne({ name: req.body.title})
     .then((movie) => {
       if (movie) {
-        return res.status(400).send(req.body.name + 'already exists');
+        return res.status(400).send(req.body.title + 'already exists');
       } else {
         users
           .create({
@@ -236,7 +277,12 @@ app.post('/movie', passport.authenticate('jwt', { session: false }),(req, res) =
     })
 });
 //update Movie Info
-app.put("/movies/:movieId", passport.authenticate('jwt', { session: false }),(req, res) =>{
+app.put("/movies/:movieId", passport.authenticate('jwt', { session: false }),[
+  check('title', 'Title is required').isAlphanumeric(),
+  check('filmingLocations.name', 'Alphabetical Characters Only').isAlpha(),
+  check('filmingLocations.location.name', 'Alphabetical Characters Only').isAlpha(),
+  check('filmingLocations.locations.location', 'Please enter LatLong coordinates').isLatLong()
+],(req, res) =>{
   movies.findByIdAndUpdate(req.params.movieId,{$set:req.body},{new:true}, function(error, result){
     if(error){
       res.status(500).send('Error: ' + error);
@@ -245,7 +291,11 @@ app.put("/movies/:movieId", passport.authenticate('jwt', { session: false }),(re
 })
 });
 // add filming locations to movie
-app.post("/movies/:movieId", passport.authenticate('jwt', { session: false }),(req, res) =>{
+app.post("/movies/:movieId", passport.authenticate('jwt', { session: false }),[
+  check('filmingLocations.name', 'Alphabetical Characters Only').isAlpha(),
+  check('filmingLocations.location.name', 'Alphabetical Characters Only').isAlpha(),
+  check('filmingLocations.locations.location', 'Please enter LatLong coordinates').isLatLong()
+],(req, res) =>{
   movies.findByIdAndUpdate(req.params.movieId,{$push:{ filmingLocations : req.body}},{new:true}, function(err, result){
     if(err){
       res.status(500).send('Error: ' + error);
@@ -254,7 +304,11 @@ app.post("/movies/:movieId", passport.authenticate('jwt', { session: false }),(r
 })
 });
 // remove filming locations from movie
-app.delete("/movies/:movieId", passport.authenticate('jwt', { session: false }),(req, res) =>{
+app.delete("/movies/:movieId", passport.authenticate('jwt', { session: false }),[
+  check('filmingLocations.name', 'Alphabetical Characters Only').isAlpha(),
+  check('filmingLocations.location.name', 'Alphabetical Characters Only').isAlpha(),
+  check('filmingLocations.locations.location', 'Please enter LatLong coordinates').isLatLong()
+],(req, res) =>{
   movies.findByIdAndUpdate(req.params.movieId,{$pull:{ filmingLocations : {name: req.body.name}}},{new:true}, function(err, result){
     if(err){
       res.status(500).send('Error: ' + error);
@@ -306,7 +360,7 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send("Server Error");
 });
-app.listen(8080, () => {
-  console.log("Listening on port 8080");
+const port = process.env.PORT || 8080;
+app.listen(port, '0.0.0.0',() => {
+ console.log('Listening on Port ' + port);
 });
-
