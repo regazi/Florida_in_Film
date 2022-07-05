@@ -19,20 +19,24 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const { check, validationResult } = require('express-validator');
 //set up CORS
 const cors = require('cors');
+app.use(cors());
+
+/*
 let allowedOrigins = ['http://localhost:8080', 'http://testsite.com'];
 
 app.use(cors({
   origin: (origin, callback) => {
     if(!origin) return callback(null, true);
-    if(allowedOrigins.indexOf(origin) === -1){ // If a specific origin isn’t found on the list of allowed origins
+    if(allowedOrigins.indexOf(origin) === -1){
       let message = 'The CORS policy for this application doesn’t allow access from origin ' + origin;
       return callback(new Error(message ), false);
     }
     return callback(null, true);
   }
 }));
+*/
 
-//set up Passport
+//set up Passport 
 let auth = require('./auth')(app);
 const passport = require('passport');
 const { callbackify } = require("util");
@@ -47,7 +51,10 @@ app.use(morgan("combined", {stream: accessLogStream}));
 //---------------------------------------------------------Database------------------------------------------------------
 
 //mongoose.connect('mongodb://localhost:27017/DBfif', { useNewUrlParser: true, useUnifiedTopology: true });
-mongoose.connect(process.env.CONNECTION_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(process.env.CONNECTION_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+.then(() => console.log('MongoDB Connected...'))
+.catch((error) => console.log(error)
+);
 
 
 //---------------------------------------------------------URL req handling------------------------------------------------------
@@ -175,6 +182,8 @@ app.delete("/users/:name/movies/:MovieID", passport.authenticate('jwt', { sessio
 app.get("/", (req, res) => {
     res.sendFile("documentation.html", { root: "public" });
   });
+
+
 //return all movies
 app.get("/movies", passport.authenticate('jwt', { session: false }),(req, res) => {
   movies.find()
