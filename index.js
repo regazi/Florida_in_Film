@@ -58,8 +58,10 @@ mongoose.connect(process.env.CONNECTION_URI, { useNewUrlParser: true, useUnified
 
 
 //---------------------------------------------------------URL req handling------------------------------------------------------
-// Remember that you need to update both the PDF that contains your resume and that you need to update the structure of it all so that you can be better
+
+
 // -- users -- users -- users -- users -- users -- users -- users -- users --
+
 
 //read -- all users 
 app.get('/users', passport.authenticate('jwt', { session: false }), (req, res) => {
@@ -79,7 +81,8 @@ app.post("/users", [
   check('username', 'Username is required').isLength({ min: 5 }),
   check('username', 'Username contains non alphanumeric characters - not allowed.').isAlphanumeric(),
   check('password', 'Password is required').not().isEmpty(),
-  check('email', 'Email does not appear to be valid').isEmail()
+  check('email', 'Email does not appear to be valid').isEmail(),
+  check('birthday', 'Please enter a valid date').trim().isDate()
 ], (req, res) => {
   //input validation
   let errors = validationResult(req);
@@ -117,17 +120,18 @@ app.post("/users", [
 app.put("/users/:id", passport.authenticate('jwt', { session: false }), [
   check('username', 'Username is required').isLength({ min: 5 }),
   check('username', 'Username contains non alphanumeric characters - not allowed.').isAlphanumeric(),
-  check('email', 'Email does not appear to be valid').isEmail()
+  check('email', 'Email does not appear to be valid').isEmail(),
+  check('birthday', 'Please enter a valid date').trim().isDate()
 ], (req, res) => {
-  if (req.body.password) {
-    let hashedPassword = users.hashPassword(req.body.password)
-    users.findByIdAndUpdate(req.params.id, { $set: { password: hashedPassword } }, { new: true }, function (err, result) {
-      if (err) {
-        console.log(err);
-      }
-    });
-  }
-  users.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true }, function (err, result) {
+  let hashedPassword = users.hashPassword(req.body.password)
+  users.findByIdAndUpdate(req.params.id, {
+    $set: {
+      username: req.body.username,
+      email: req.body.email,
+      password: hashedPassword,
+      birthday: req.body.birthday
+    }
+  }, { new: true }, function (err, result) {
     if (err) {
       console.log(err);
     }
@@ -346,7 +350,7 @@ app.get("/directors", passport.authenticate('jwt', { session: false }), (req, re
     })
 });
 app.get("/directors/:name", passport.authenticate('jwt', { session: false }), (req, res) => {
-  directors.findOne({ "director.name": req.params.name }).then
+  directors.findOne({ name: req.params.name }).then
     ((director) => {
       res.status(200).json(director)
     }).catch((err) => {
