@@ -50,11 +50,11 @@ app.use(morgan("combined", { stream: accessLogStream }));
 //movie repo
 //---------------------------------------------------------Database------------------------------------------------------
 
-mongoose.connect('mongodb://localhost:27017/DBfif', { useNewUrlParser: true, useUnifiedTopology: true });
-// mongoose.connect(process.env.CONNECTION_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-// .then(() => console.log('MongoDB Connected...'))
-//  .catch((error) => console.log(error)
-//  );
+//mongoose.connect('mongodb://localhost:27017/DBfif', { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(process.env.CONNECTION_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('MongoDB Connected...'))
+  .catch((error) => console.log(error)
+  );
 
 
 //---------------------------------------------------------URL req handling------------------------------------------------------
