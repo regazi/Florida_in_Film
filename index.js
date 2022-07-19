@@ -254,7 +254,8 @@ app.get("/movies/filmingLocations/:cityName", passport.authenticate('jwt', { ses
 });
 
 //create -- add movie to database
-app.post('/movie', passport.authenticate('jwt', { session: false }), [
+// passport.authenticate('jwt', { session: false })
+app.post('/movie', [
   check('title', 'Title is required').isAlphanumeric(),
   check('filmingLocations.name', 'Alphabetical Characters Only').isAlpha(),
   check('filmingLocations.location.name', 'Alphabetical Characters Only').isAlpha(),
