@@ -197,7 +197,8 @@ app.get("/", (req, res) => {
 
 
 //return all movies
-app.get("/movies", passport.authenticate('jwt', { session: false }), (req, res) => {
+//, passport.authenticate('jwt', { session: false })
+app.get("/movies", (req, res) => {
   movies.find()
     .then((movies) => {
       res.status(201).json(movies);
@@ -254,8 +255,7 @@ app.get("/movies/filmingLocations/:cityName", passport.authenticate('jwt', { ses
 });
 
 //create -- add movie to database
-// passport.authenticate('jwt', { session: false })
-app.post('/movie', [
+app.post('/movie', passport.authenticate('jwt', { session: false }), [
   check('title', 'Title is required').isAlphanumeric(),
   check('filmingLocations.name', 'Alphabetical Characters Only').isAlpha(),
   check('filmingLocations.location.name', 'Alphabetical Characters Only').isAlpha(),
