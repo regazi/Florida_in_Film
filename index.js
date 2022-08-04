@@ -180,8 +180,7 @@ app.delete("/users/:UserID/movies/:MovieID", passport.authenticate('jwt', { sess
   users.findByIdUpdate(req.params.UserID, {
     $pull: { favoriteMovies: req.params.MovieID }
   },
-    { new: true },
-    (err, updatedUser) => {
+    { new: true }, function (err, updatedUser) {
       if (err) {
         console.error(err);
         res.status(500).send('Error: ' + err);
