@@ -133,21 +133,21 @@ app.put("/users/:id", passport.authenticate('jwt', { session: false }), [
   check('email', 'Email does not appear to be valid').isEmail(),
   check('birthday', 'Please enter a valid date').trim().isDate()
 ], (req, res) => {
-  let hashedPassword = users.hashPassword(req.body.password)
-  users.findByIdAndUpdate(req.params.id, {
-    $set: {
-      username: req.body.username,
-      email: req.body.email,
-      password: hashedPassword,
-      birthday: req.body.birthday
-    }
-  }, { new: true }, function (err, result) {
-    if (err) {
-      console.log(err);
-    }
-    res.send(result)
-  });
-
+  if (req.body.password) {
+    let hashedPassword = users.hashPassword(req.body.password)
+    users.findByIdAndUpdate(req.params.movieId, { $set: { password: hashedPassword } }, { new: true }, function (error, result) {
+      if (error) {
+        res.status(500).send('Error: ' + error);
+      }
+      res.send(result);
+    })
+  } else
+    users.findByIdAndUpdate(req.params.movieId, { $set: req.body }, { new: true }, function (error, result) {
+      if (error) {
+        res.status(500).send('Error: ' + error);
+      }
+      res.send(result);
+    })
 })
 //delete -- delete user 
 app.delete("/users/:id", passport.authenticate('jwt', { session: false }), (req, res) => {
