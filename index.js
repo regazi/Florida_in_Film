@@ -152,7 +152,6 @@ app.put("/users/:id", passport.authenticate('jwt', { session: false }), [
     users.findByIdAndUpdate(req.params.movieId, {
       $set: {
         username: req.body.username,
-        password: hashedPassword,
         email: req.body.email,
         birthday: req.body.birthday
       }
