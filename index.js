@@ -135,14 +135,28 @@ app.put("/users/:id", passport.authenticate('jwt', { session: false }), [
 ], (req, res) => {
   if (req.body.password) {
     let hashedPassword = users.hashPassword(req.body.password)
-    users.findByIdAndUpdate(req.params.movieId, { $set: { password: hashedPassword } }, { new: true }, function (error, result) {
+    users.findByIdAndUpdate(req.params.movieId, {
+      $set: {
+        username: req.body.username,
+        password: hashedPassword,
+        email: req.body.email,
+        birthday: req.body.birthday
+      }
+    }, { new: true }, function (error, result) {
       if (error) {
         res.status(500).send('Error: ' + error);
       }
       res.send(result);
     })
   } else {
-    users.findByIdAndUpdate(req.params.movieId, { $set: req.body }, { new: true }, function (error, result) {
+    users.findByIdAndUpdate(req.params.movieId, {
+      $set: {
+        username: req.body.username,
+        password: hashedPassword,
+        email: req.body.email,
+        birthday: req.body.birthday
+      }
+    }, { new: true }, function (error, result) {
       if (error) {
         res.status(500).send('Error: ' + error);
       }
@@ -150,7 +164,6 @@ app.put("/users/:id", passport.authenticate('jwt', { session: false }), [
     })
   }
 })
-
 //delete -- delete user 
 app.delete("/users/:id", passport.authenticate('jwt', { session: false }), (req, res) => {
   users.findByIdAndDelete(req.params.id, function (err, result) {
