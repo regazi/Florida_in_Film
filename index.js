@@ -141,14 +141,16 @@ app.put("/users/:id", passport.authenticate('jwt', { session: false }), [
       }
       res.send(result);
     })
+  } else {
+    users.findByIdAndUpdate(req.params.movieId, { $set: req.body }, { new: true }, function (error, result) {
+      if (error) {
+        res.status(500).send('Error: ' + error);
+      }
+      res.send(result);
+    })
   }
-  users.findByIdAndUpdate(req.params.movieId, { $set: req.body }, { new: true }, function (error, result) {
-    if (error) {
-      res.status(500).send('Error: ' + error);
-    }
-    res.send(result);
-  })
 })
+
 //delete -- delete user 
 app.delete("/users/:id", passport.authenticate('jwt', { session: false }), (req, res) => {
   users.findByIdAndDelete(req.params.id, function (err, result) {
