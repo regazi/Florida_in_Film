@@ -135,7 +135,7 @@ app.put("/users/:id", passport.authenticate('jwt', { session: false }), [
 ], (req, res) => {
   if (req.body.password) {
     let hashedPassword = users.hashPassword(req.body.password)
-    users.findByIdAndUpdate(req.params.movieId, {
+    users.findByIdAndUpdate(req.params.id, {
       $set: {
         username: req.body.username,
         password: hashedPassword,
@@ -149,7 +149,7 @@ app.put("/users/:id", passport.authenticate('jwt', { session: false }), [
       res.send(result);
     })
   } else {
-    users.findByIdAndUpdate(req.params.movieId, {
+    users.findByIdAndUpdate(req.params.id, {
       $set: {
         username: req.body.username,
         email: req.body.email,
